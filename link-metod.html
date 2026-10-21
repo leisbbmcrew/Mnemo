@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link metod · Mnemonica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef0f4;
+    --ink: #1b2540;
+    --muted: #5b6580;
+    --teal: #1f7a7a;
+    --teal-soft: #d6e8e8;
+    --line: #cdd3df;
+    --surface: #f8f9fb;
+    --danger: #a3302f;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 24px 20px 64px; }
+  .back {
+    display: inline-block;
+    color: var(--teal);
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 0;
+  }
+  .back:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+  }
+  h1, h2, h3 {
+    font-family: "Young Serif", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+  }
+  h1 { font-size: clamp(2rem, 7vw, 2.8rem); line-height: 1.1; margin: 12px 0 16px; }
+  h2 { font-size: 1.35rem; margin: 36px 0 14px; }
+  h3 { font-size: 1.2rem; line-height: 1.25; margin: 0 0 6px; }
+  .intro { max-width: 62ch; margin: 0 0 24px; }
+  .intro p { margin: 0 0 12px; }
+
+  .btn {
+    font: inherit;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--teal); }
+  .btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.small { padding: 8px 14px; font-size: 0.92rem; font-weight: 500; }
+  .btn.danger { color: var(--danger); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin-top: 16px;
+  }
+  .card[hidden] { display: none; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .field label, .field .lbl { font-weight: 600; }
+  .field input, .field textarea {
+    font: inherit;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    width: 100%;
+  }
+  .field textarea { resize: vertical; min-height: 96px; }
+  .hint { color: var(--muted); font-size: 0.92rem; margin: 0 0 4px; }
+
+  .chain { display: flex; flex-direction: column; margin: 4px 0 12px; }
+  .conn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0;
+  }
+  .conn .arrow {
+    flex: none;
+    width: 96px;
+    text-align: center;
+    color: var(--teal);
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+  .conn input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+  }
+  .conn .txt { color: var(--ink); font-size: 0.95rem; font-style: italic; }
+  .ph { position: relative; width: 96px; height: 96px; }
+  .ph img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .ph .x {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(27, 37, 64, 0.85);
+    color: #fff;
+    font-size: 14px;
+    line-height: 22px;
+    cursor: pointer;
+  }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+
+  .item .desc { margin: 0 0 12px; white-space: pre-wrap; color: var(--muted); }
+  .item + .item { margin-top: 14px; }
+  .empty { color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← Mnemonica</a>
+    <h1>Link metod</h1>
+
+    <section class="intro">
+      <p>Il metodo del collegamento serve a ricordare una sequenza di cose legandole una all’altra in una piccola storia. Ogni immagine richiama la successiva: quando ritrovi la prima, ti torna in mente tutta la catena.</p>
+      <p>Più la scena è strana, esagerata o in movimento, meglio si fissa nella memoria.</p>
+    </section>
+
+    <button type="button" class="btn primary" id="new">Nuovo</button>
+
+    <form class="card" id="form" hidden>
+      <div class="field">
+        <label for="title">Titolo</label>
+        <input type="text" id="title" maxlength="120" required autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="desc">Descrizione del ricordo</label>
+        <textarea id="desc" rows="4"></textarea>
+      </div>
+      <div class="field">
+        <span class="lbl">Foto</span>
+        <p class="hint">Aggiungile nell’ordine in cui compaiono nel ricordo. Tra una foto e l’altra scrivi l’azione che le collega.</p>
+        <div class="chain" id="draftChain"></div>
+        <div>
+          <button type="button" class="btn small" id="addPhoto">Aggiungi foto</button>
+        </div>
+        <input type="file" id="files" accept="image/*" multiple hidden>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn primary">Salva</button>
+        <button type="button" class="btn" id="cancel">Annulla</button>
+      </div>
+    </form>
+
+    <h2>Le tue stringhe</h2>
+    <div id="list"></div>
+  </div>
+
+<script>
+(function () {
+  var KEY = 'mnemonica-link-metod';
+  var items = [];
+  try { items = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { items = []; }
+
+  // Ogni passo: s = foto, a = azione che collega questa foto alla successiva
+  function toSteps(p) {
+    return (p || []).map(function (x) {
+      return typeof x === 'string' ? { s: x, a: '' } : { s: x.s, a: x.a || '' };
+    });
+  }
+  items.forEach(function (it) { it.p = toSteps(it.p); });
+
+  var draft = { id: null, photos: [] };
+
+  var form = document.getElementById('form');
+  var titleEl = document.getElementById('title');
+  var descEl = document.getElementById('desc');
+  var draftChain = document.getElementById('draftChain');
+  var filesEl = document.getElementById('files');
+  var listEl = document.getElementById('list');
+
+  function persist() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(items));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Riduce la foto (lato lungo massimo 360 px) per risparmiare spazio nel browser
+  function shrink(file, done) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      var r = Math.min(1, 360 / Math.max(img.width, img.height));
+      var w = Math.round(img.width * r);
+      var h = Math.round(img.height * r);
+      var cv = document.createElement('canvas');
+      cv.width = w;
+      cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      done(cv.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      done('');
+    };
+    img.src = url;
+  }
+
+  function chainNode(steps, editable) {
+    var frag = document.createDocumentFragment();
+    steps.forEach(function (st, i) {
+      var ph = document.createElement('div');
+      ph.className = 'ph';
+      var img = document.createElement('img');
+      img.alt = 'Foto ' + (i + 1) + ' della catena';
+      img.src = st.s;
+      ph.appendChild(img);
+      if (editable) {
+        var x = document.createElement('button');
+        x.type = 'button';
+        x.className = 'x';
+        x.setAttribute('data-i', i);
+        x.setAttribute('aria-label', 'Rimuovi la foto ' + (i + 1));
+        x.textContent = '×';
+        ph.appendChild(x);
+      }
+      frag.appendChild(ph);
+
+      if (i < steps.length - 1) {
+        var conn = document.createElement('div');
+        conn.className = 'conn';
+        var ar = document.createElement('span');
+        ar.className = 'arrow';
+        ar.setAttribute('aria-hidden', 'true');
+        ar.textContent = '↓';
+        conn.appendChild(ar);
+        if (editable) {
+          var inp = document.createElement('input');
+          inp.type = 'text';
+          inp.className = 'act';
+          inp.maxLength = 160;
+          inp.autocomplete = 'off';
+          inp.placeholder = 'Azione che collega alla foto successiva';
+          inp.setAttribute('data-i', i);
+          inp.setAttribute('aria-label', 'Azione tra la foto ' + (i + 1) + ' e la foto ' + (i + 2));
+          inp.value = st.a;
+          conn.appendChild(inp);
+        } else if (st.a) {
+          var tx = document.createElement('span');
+          tx.className = 'txt';
+          tx.textContent = st.a;
+          conn.appendChild(tx);
+        }
+        frag.appendChild(conn);
+      }
+    });
+    return frag;
+  }
+
+  function renderDraft() {
+    draftChain.textContent = '';
+    draftChain.appendChild(chainNode(draft.photos, true));
+  }
+
+  function renderList() {
+    listEl.textContent = '';
+    if (!items.length) {
+      var p = document.createElement('p');
+      p.className = 'empty';
+      p.textContent = 'Non hai ancora creato nessuna stringa. Tocca “Nuovo” per iniziare.';
+      listEl.appendChild(p);
+      return;
+    }
+    items.forEach(function (it) {
+      var card = document.createElement('article');
+      card.className = 'card item';
+
+      var h = document.createElement('h3');
+      h.textContent = it.t;
+      card.appendChild(h);
+
+      if (it.d) {
+        var d = document.createElement('p');
+        d.className = 'desc';
+        d.textContent = it.d;
+        card.appendChild(d);
+      }
+
+      if (it.p && it.p.length) {
+        var ch = document.createElement('div');
+        ch.className = 'chain';
+        ch.appendChild(chainNode(it.p, false));
+        card.appendChild(ch);
+      }
+
+      var act = document.createElement('div');
+      act.className = 'actions';
+
+      var edit = document.createElement('button');
+      edit.type = 'button';
+      edit.className = 'btn small';
+      edit.setAttribute('data-act', 'edit');
+      edit.setAttribute('data-id', it.id);
+      edit.textContent = 'Modifica';
+
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'btn small danger';
+      del.setAttribute('data-act', 'del');
+      del.setAttribute('data-id', it.id);
+      del.textContent = 'Elimina';
+
+      act.appendChild(edit);
+      act.appendChild(del);
+      card.appendChild(act);
+      listEl.appendChild(card);
+    });
+  }
+
+  function openForm(it) {
+    draft = it
+      ? { id: it.id, photos: it.p.map(function (st) { return { s: st.s, a: st.a }; }) }
+      : { id: null, photos: [] };
+    titleEl.value = it ? it.t : '';
+    descEl.value = it ? it.d : '';
+    renderDraft();
+    form.hidden = false;
+    titleEl.focus();
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closeForm() {
+    form.hidden = true;
+    draft = { id: null, photos: [] };
+  }
+
+  document.getElementById('new').addEventListener('click', function () { openForm(null); });
+  document.getElementById('cancel').addEventListener('click', closeForm);
+  document.getElementById('addPhoto').addEventListener('click', function () { filesEl.click(); });
+
+  filesEl.addEventListener('change', function () {
+    var queue = Array.prototype.slice.call(filesEl.files || []);
+    filesEl.value = '';
+    (function next() {
+      if (!queue.length) { renderDraft(); return; }
+      shrink(queue.shift(), function (src) {
+        if (src) draft.photos.push({ s: src, a: '' });
+        next();
+      });
+    })();
+  });
+
+  draftChain.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t.classList.contains('act')) return;
+    var st = draft.photos[parseInt(t.getAttribute('data-i'), 10)];
+    if (st) st.a = t.value;
+  });
+
+  draftChain.addEventListener('click', function (ev) {
+    var x = ev.target.closest('.x');
+    if (!x) return;
+    draft.photos.splice(parseInt(x.getAttribute('data-i'), 10), 1);
+    renderDraft();
+  });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var t = titleEl.value.trim();
+    if (!t) { titleEl.focus(); return; }
+    var entry = { id: draft.id || String(Date.now()), t: t, d: descEl.value.trim(), p: draft.photos.map(function (st) { return { s: st.s, a: st.a.trim() }; }) };
+    var backup = items.slice();
+    var idx = -1;
+    items.forEach(function (it, i) { if (it.id === entry.id) idx = i; });
+    if (idx >= 0) items[idx] = entry; else items.unshift(entry);
+    if (!persist()) {
+      items = backup;
+      alert('Lo spazio del browser è pieno: non riesco a salvare questa stringa. Prova con meno foto.');
+      return;
+    }
+    closeForm();
+    renderList();
+  });
+
+  listEl.addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-act]');
+    if (!b) return;
+    var id = b.getAttribute('data-id');
+    var it = items.filter(function (x) { return x.id === id; })[0];
+    if (!it) return;
+    if (b.getAttribute('data-act') === 'edit') {
+      openForm(it);
+    } else if (confirm('Vuoi eliminare questa stringa?')) {
+      items = items.filter(function (x) { return x.id !== id; });
+      persist();
+      renderList();
+    }
+  });
+
+  renderList();
+})();
+</script>
+</body>
+</html>

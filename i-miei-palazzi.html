@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I miei Palazzi · Mnemonica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#eef0f4; --ink:#1b2540; --muted:#5b6580; --teal:#1f7a7a; --soft:#d6e8e8; --line:#cdd3df; --surf:#f8f9fb; --danger:#a3302f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.5; }
+  .wrap { max-width:640px; margin:0 auto; padding:24px 20px 64px; }
+  .back { display:inline-block; color:var(--teal); font-weight:500; text-decoration:none; padding:6px 0; }
+  h1, h2 { font-family:"Young Serif",Georgia,serif; font-weight:400; }
+  h1 { font-size:clamp(2rem,7vw,2.8rem); line-height:1.1; margin:12px 0 16px; }
+  h2 { font-size:1.25rem; line-height:1.25; margin:0 0 4px; }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--teal); outline-offset:2px; }
+  .card { display:flex; gap:14px; align-items:center; background:var(--surf); border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:14px; }
+  .card img { width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--line); flex:none; }
+  .grow { flex:1; min-width:0; }
+  .meta { color:var(--muted); font-size:.92rem; margin:0; }
+  .acts { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .btn { display:inline-block; font:inherit; font-weight:600; font-size:.92rem; padding:8px 14px; border-radius:12px; border:1px solid var(--line); background:var(--surf); color:var(--ink); cursor:pointer; text-decoration:none; }
+  .btn:hover { border-color:var(--teal); }
+  .btn.primary { background:var(--teal); border-color:var(--teal); color:#fff; }
+  .btn.del { color:var(--danger); }
+  .empty { color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Mnemonica</a>
+  <h1>I miei Palazzi</h1>
+  <div id="list"></div>
+  <div class="acts" style="margin-top:20px"><a class="btn primary" href="palazzo-memoria.html">Nuovo</a></div>
+</div>
+<script>
+(function () {
+  var KEY = 'mnemonica-palazzi', all = [], box = document.getElementById('list');
+  try { all = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { all = []; }
+
+  function count(p) {
+    var a = p.am || [], lu = 0, lo = 0;
+    a.forEach(function (x) { (x.lu || []).forEach(function (l) { lu++; lo += (l.lo || []).length; }); });
+    return 'Ambienti: ' + a.length + ' · Luoghi o stanze: ' + lu + ' · Loci: ' + lo;
+  }
+
+  function render() {
+    box.textContent = '';
+    if (!all.length) {
+      var e = document.createElement('p');
+      e.className = 'empty';
+      e.textContent = 'Non hai ancora nessun palazzo. Tocca “Nuovo” per costruirne uno.';
+      box.appendChild(e);
+      return;
+    }
+    all.forEach(function (p) {
+      var card = document.createElement('div'); card.className = 'card';
+      if (p.ph) { var im = document.createElement('img'); im.alt = ''; im.src = p.ph; card.appendChild(im); }
+      var g = document.createElement('div'); g.className = 'grow';
+      var h = document.createElement('h2'); h.textContent = p.t || 'Senza titolo'; g.appendChild(h);
+      var m = document.createElement('p'); m.className = 'meta'; m.textContent = count(p); g.appendChild(m);
+      var a = document.createElement('div'); a.className = 'acts';
+      var open = document.createElement('a'); open.className = 'btn primary'; open.textContent = 'Apri o modifica';
+      open.href = 'palazzo-memoria.html?id=' + encodeURIComponent(p.id); a.appendChild(open);
+      var del = document.createElement('button'); del.type = 'button'; del.className = 'btn del'; del.textContent = 'Elimina';
+      del.addEventListener('click', function () {
+        if (!confirm('Vuoi eliminare questo palazzo con tutto ciò che contiene?')) return;
+        all = all.filter(function (x) { return x.id !== p.id; });
+        try { localStorage.setItem(KEY, JSON.stringify(all)); } catch (e) {}
+        render();
+      });
+      a.appendChild(del); g.appendChild(a); card.appendChild(g); box.appendChild(card);
+    });
+  }
+  render();
+})();
+</script>
+</body>
+</html>

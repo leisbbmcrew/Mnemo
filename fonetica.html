@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conversione fonetica · Mnemonica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef0f4;
+    --ink: #1b2540;
+    --muted: #5b6580;
+    --teal: #1f7a7a;
+    --teal-soft: #d6e8e8;
+    --line: #cdd3df;
+    --surface: #f8f9fb;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 20px 64px; }
+  .back {
+    display: inline-block;
+    color: var(--teal);
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 0;
+  }
+  .back:hover { text-decoration: underline; }
+  a:focus-visible, input:focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+  }
+  h1, h2, .digit {
+    font-family: "Young Serif", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+  }
+  h1 {
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    line-height: 1.1;
+    margin: 12px 0 20px;
+  }
+  h2 { font-size: 1.35rem; margin: 40px 0 14px; }
+  .intro { max-width: 68ch; }
+  .intro p { margin: 0 0 12px; }
+
+  /* Schema fonemi */
+  .scheme {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .scheme ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .scheme li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+  }
+  .scheme li + li { border-top: 1px solid var(--line); }
+  .digit {
+    flex: none;
+    width: 2rem;
+    font-size: 1.7rem;
+    line-height: 1;
+    color: var(--teal);
+    text-align: center;
+  }
+  .sounds { display: flex; flex-direction: column; min-width: 0; }
+  .sounds strong { font-weight: 600; }
+  .sounds small { color: var(--muted); font-size: 0.85rem; }
+
+  /* Griglia 0-99 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .col {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 6px 10px 10px;
+  }
+  .col summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    list-style: none;
+  }
+  .col summary::-webkit-details-marker { display: none; }
+  .col summary::after {
+    content: "▾";
+    color: var(--teal);
+    transition: transform .15s ease;
+  }
+  .col[open] summary::after { transform: rotate(180deg); }
+  .col summary:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; border-radius: 8px; }
+  .col[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+  @media (prefers-reduced-motion: reduce) {
+    .col summary::after { transition: none; }
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 2.2rem 1fr 2.75rem;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+  }
+  .row + .row { border-top: 1px solid var(--line); }
+  .num {
+    font-family: "Young Serif", Georgia, "Times New Roman", serif;
+    color: var(--teal);
+    text-align: right;
+    padding-right: 4px;
+  }
+  .row input {
+    width: 100%;
+    min-width: 0;
+    font: inherit;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px dashed var(--line);
+    border-radius: 0;
+    padding: 6px 4px;
+  }
+  .row input:focus { border-bottom-color: var(--teal); background: #fff; }
+  .row input::placeholder { color: #9aa3b8; }
+  .pwrap { position: relative; width: 2.75rem; height: 2.75rem; }
+  .photo {
+    position: relative;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: #9aa3b8;
+    font: inherit;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .photo:hover { border-color: var(--teal); color: var(--teal); }
+  .photo:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+  .photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .photo.has { border-style: solid; border-color: var(--line); }
+  .photo-input { display: none; }
+  .clear {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 18px;
+    height: 18px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(27, 37, 64, 0.75);
+    color: #fff;
+    font-size: 12px;
+    line-height: 18px;
+    padding: 0;
+    cursor: pointer;
+  }
+  .note { color: var(--muted); font-size: 0.9rem; margin-top: 14px; max-width: 68ch; }
+
+  @media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .scheme { gap: 10px; }
+    .scheme li { padding: 9px 10px; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← Mnemonica</a>
+    <h1>Conversione fonetica</h1>
+
+    <section class="intro" aria-labelledby="metodo">
+      <h2 id="metodo" style="margin-top:0">Come funziona</h2>
+      <p>Ogni cifra da 0 a 9 corrisponde a uno o più suoni consonantici. Per ricordare un numero lo trasformi in una parola: scegli una parola che contenga, nell’ordine, i suoni delle sue cifre.</p>
+      <p>Le vocali non hanno valore, e nemmeno le lettere h, w e y: servono solo a formare la parola. Conta il suono, non la lettera, e le doppie contano una volta sola.</p>
+      <p>Poi trasformi la parola in un’immagine. Il numero diventa qualcosa che puoi vedere, e le immagini si ricordano meglio dei numeri.</p>
+    </section>
+
+    <h2>Schema dei suoni</h2>
+    <div class="scheme">
+      <ul>
+        <li><span class="digit">0</span><span class="sounds"><strong>S, Z</strong><small>zero comincia con Z</small></span></li>
+        <li><span class="digit">1</span><span class="sounds"><strong>T, D</strong><small>la T ha un solo tratto verticale</small></span></li>
+        <li><span class="digit">2</span><span class="sounds"><strong>N</strong><small>la N ha due gambe</small></span></li>
+        <li><span class="digit">3</span><span class="sounds"><strong>M</strong><small>la M ha tre gambe</small></span></li>
+        <li><span class="digit">4</span><span class="sounds"><strong>R</strong><small>quattro finisce con R</small></span></li>
+      </ul>
+      <ul>
+        <li><span class="digit">5</span><span class="sounds"><strong>L</strong><small>L è il 50 in numeri romani</small></span></li>
+        <li><span class="digit">6</span><span class="sounds"><strong>C e G dolci, SC</strong><small>ci, ce, gi, ge, sci, sce</small></span></li>
+        <li><span class="digit">7</span><span class="sounds"><strong>C e G dure, Q</strong><small>ca, co, cu, ch, ga, go, gu, gh</small></span></li>
+        <li><span class="digit">8</span><span class="sounds"><strong>F, V</strong><small>l’8 somiglia a una f corsiva</small></span></li>
+        <li><span class="digit">9</span><span class="sounds"><strong>P, B</strong><small>il 9 è una P rovesciata</small></span></li>
+      </ul>
+    </div>
+
+    <h2>Le tue parole da 0 a 99</h2>
+    <div class="grid" id="grid"></div>
+    <p class="note">Scrivi la parola e, nella casella accanto, tocca il quadrato per aggiungere una piccola foto che la rappresenta. Parole e foto restano salvate in questo browser, su questo dispositivo.</p>
+  </div>
+
+<script>
+(function () {
+  var KEY = 'mnemonica-fonetica';
+  var data = {};
+  try { data = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { data = {}; }
+
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(data));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function entry(n) {
+    if (!data[n]) data[n] = { w: '', p: '' };
+    return data[n];
+  }
+
+  // Ritaglia la foto al centro in un quadrato di 96x96 px per tenerla leggera
+  function shrink(file, done) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      var s = 96;
+      var cv = document.createElement('canvas');
+      cv.width = s;
+      cv.height = s;
+      var m = Math.min(img.width, img.height);
+      var sx = (img.width - m) / 2;
+      var sy = (img.height - m) / 2;
+      cv.getContext('2d').drawImage(img, sx, sy, m, m, 0, 0, s, s);
+      URL.revokeObjectURL(url);
+      done(cv.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      done('');
+    };
+    img.src = url;
+  }
+
+  function paint(wrap, src) {
+    var btn = wrap.querySelector('.photo');
+    var old = wrap.querySelector('.clear');
+    if (old) old.remove();
+    if (src) {
+      btn.classList.add('has');
+      btn.innerHTML = '<img alt="" src="' + src + '">';
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'clear';
+      x.setAttribute('aria-label', 'Rimuovi la foto');
+      x.textContent = '×';
+      wrap.appendChild(x);
+    } else {
+      btn.classList.remove('has');
+      btn.textContent = '+';
+    }
+  }
+
+  var grid = document.getElementById('grid');
+
+  for (var c = 0; c < 4; c++) {
+    var col = document.createElement('details');
+    col.className = 'col';
+    var from = c * 25, to = from + 24;
+    var h = document.createElement('summary');
+    h.textContent = 'Da ' + from + ' a ' + to;
+    col.appendChild(h);
+
+    for (var n = from; n <= to; n++) {
+      var row = document.createElement('div');
+      row.className = 'row';
+
+      var num = document.createElement('span');
+      num.className = 'num';
+      num.textContent = n;
+
+      var word = document.createElement('input');
+      word.type = 'text';
+      word.className = 'word';
+      word.setAttribute('data-n', n);
+      word.setAttribute('aria-label', 'Parola per il numero ' + n);
+      word.autocomplete = 'off';
+      word.value = (data[n] && data[n].w) || '';
+
+      var wrap = document.createElement('div');
+      wrap.className = 'pwrap';
+      wrap.setAttribute('data-n', n);
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'photo';
+      btn.setAttribute('aria-label', 'Foto per il numero ' + n);
+
+      var file = document.createElement('input');
+      file.type = 'file';
+      file.accept = 'image/*';
+      file.className = 'photo-input';
+      file.setAttribute('aria-hidden', 'true');
+      file.tabIndex = -1;
+
+      wrap.appendChild(btn);
+      wrap.appendChild(file);
+      paint(wrap, (data[n] && data[n].p) || '');
+
+      row.appendChild(num);
+      row.appendChild(word);
+      row.appendChild(wrap);
+      col.appendChild(row);
+    }
+    grid.appendChild(col);
+  }
+
+  grid.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (t.classList.contains('word')) {
+      entry(t.getAttribute('data-n')).w = t.value;
+      save();
+    }
+  });
+
+  grid.addEventListener('click', function (ev) {
+    var wrap = ev.target.closest('.pwrap');
+    if (!wrap) return;
+    var n = wrap.getAttribute('data-n');
+    if (ev.target.closest('.clear')) {
+      entry(n).p = '';
+      paint(wrap, '');
+      save();
+    } else if (ev.target.closest('.photo')) {
+      wrap.querySelector('.photo-input').click();
+    }
+  });
+
+  grid.addEventListener('change', function (ev) {
+    var t = ev.target;
+    if (!t.classList.contains('photo-input') || !t.files || !t.files[0]) return;
+    var wrap = t.closest('.pwrap');
+    var n = wrap.getAttribute('data-n');
+    shrink(t.files[0], function (src) {
+      t.value = '';
+      if (!src) return;
+      var previous = entry(n).p;
+      entry(n).p = src;
+      if (save()) {
+        paint(wrap, src);
+      } else {
+        entry(n).p = previous;
+        alert('Lo spazio del browser è pieno: non riesco a salvare questa foto.');
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mnemonica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef0f4;
+    --ink: #1b2540;
+    --muted: #5b6580;
+    --teal: #1f7a7a;
+    --teal-soft: #d6e8e8;
+    --line: #cdd3df;
+    --surface: #f8f9fb;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 48px 20px 64px;
+  }
+  header { margin-bottom: 36px; }
+  h1 {
+    font-family: "Young Serif", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    font-size: clamp(2.4rem, 9vw, 3.4rem);
+    line-height: 1.05;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 38ch;
+  }
+  nav { display: flex; flex-direction: column; }
+  .group { display: flex; flex-direction: column; gap: 10px; }
+  .group + .group { margin-top: 28px; }
+  .entry {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px 14px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .entry:hover { border-color: var(--teal); }
+  .entry:active { transform: scale(0.99); }
+  .entry:focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+  }
+  .door {
+    flex: none;
+    width: 44px;
+    height: 56px;
+  }
+  .door path { stroke: var(--teal); stroke-width: 2; fill: var(--teal-soft); }
+  .entry.mine .door path { fill: var(--teal); }
+  .entry.mine .door circle { fill: var(--surface); }
+  .door circle { fill: var(--teal); }
+  .label { display: flex; flex-direction: column; min-width: 0; }
+  .label strong {
+    font-family: "Young Serif", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+  .label span {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin-top: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .entry { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Mnemonica</h1>
+      <p>Allena la memoria con le immagini, i luoghi e le carte.</p>
+    </header>
+
+    <nav aria-label="Menu principale">
+      <div class="group">
+        <a class="entry" href="fonetica.html">
+          <svg class="door" viewBox="0 0 44 56" aria-hidden="true"><path d="M4 54V22a18 18 0 0 1 36 0v32z"/><circle cx="32" cy="36" r="2.5"/></svg>
+          <span class="label"><strong>Conversione fonetica</strong><span>Trasforma i numeri in suoni e parole</span></span>
+        </a>
+        <a class="entry" href="link-metod.html">
+          <svg class="door" viewBox="0 0 44 56" aria-hidden="true"><path d="M4 54V22a18 18 0 0 1 36 0v32z"/><circle cx="32" cy="36" r="2.5"/></svg>
+          <span class="label"><strong>Link metod</strong><span>Collega le immagini in una catena</span></span>
+        </a>
+      </div>
+
+      <div class="group">
+        <a class="entry" href="palazzo-memoria.html">
+          <svg class="door" viewBox="0 0 44 56" aria-hidden="true"><path d="M4 54V22a18 18 0 0 1 36 0v32z"/><circle cx="32" cy="36" r="2.5"/></svg>
+          <span class="label"><strong>Palazzo della memoria</strong><span>Costruisci un nuovo palazzo</span></span>
+        </a>
+        <a class="entry mine" href="i-miei-palazzi.html">
+          <svg class="door" viewBox="0 0 44 56" aria-hidden="true"><path d="M4 54V22a18 18 0 0 1 36 0v32z"/><circle cx="32" cy="36" r="2.5"/></svg>
+          <span class="label"><strong>I miei Palazzi</strong><span>I palazzi che hai creato</span></span>
+        </a>
+      </div>
+
+      <div class="group">
+        <a class="entry" href="flash-cards.html">
+          <svg class="door" viewBox="0 0 44 56" aria-hidden="true"><path d="M4 54V22a18 18 0 0 1 36 0v32z"/><circle cx="32" cy="36" r="2.5"/></svg>
+          <span class="label"><strong>Flash Cards</strong><span>Ripassa con le carte pronte</span></span>
+        </a>
+        <a class="entry mine" href="le-mie-flash-cards.html">
+          <svg class="door" viewBox="0 0 44 56" aria-hidden="true"><path d="M4 54V22a18 18 0 0 1 36 0v32z"/><circle cx="32" cy="36" r="2.5"/></svg>
+          <span class="label"><strong>Le mie Flash Cards</strong><span>Le carte che hai creato</span></span>
+        </a>
+      </div>
+    </nav>
+  </div>
+</body>
+</html>
