@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palazzo della memoria · Mnemonica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#eef0f4; --ink:#1b2540; --muted:#5b6580; --teal:#1f7a7a; --soft:#d6e8e8; --line:#cdd3df; --surf:#f8f9fb; --danger:#a3302f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.5; }
+  .wrap { max-width:720px; margin:0 auto; padding:24px 20px 64px; }
+  .back { display:inline-block; color:var(--teal); font-weight:500; text-decoration:none; padding:6px 0; }
+  h1 { font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:clamp(2rem,7vw,2.8rem); line-height:1.1; margin:12px 0 16px; }
+  .intro p { margin:0 0 12px; max-width:62ch; }
+  button, input, textarea { font:inherit; color:var(--ink); }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline:3px solid var(--teal); outline-offset:2px; }
+  .btn { font-weight:600; padding:12px 20px; border-radius:12px; border:1px solid var(--line); background:var(--surf); cursor:pointer; }
+  .btn:hover { border-color:var(--teal); }
+  .btn.primary { background:var(--teal); border-color:var(--teal); color:#fff; }
+  .btn.sm { padding:8px 14px; font-size:.92rem; font-weight:500; }
+  .card { background:var(--surf); border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:14px; }
+  .card .card { background:#fff; }
+  .hd { display:flex; gap:12px; align-items:flex-start; }
+  .grow { flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .tag { color:var(--teal); font-weight:600; font-size:.85rem; text-transform:uppercase; letter-spacing:.06em; }
+  input[type=text], textarea { width:100%; background:#fff; border:1px solid var(--line); border-radius:10px; padding:9px 11px; }
+  .card .card input[type=text], .card .card textarea { background:var(--surf); }
+  textarea { min-height:76px; resize:vertical; }
+  .pw { position:relative; flex:none; width:64px; height:64px; }
+  .ph { width:64px; height:64px; padding:0; border:1px dashed var(--line); border-radius:10px; background:transparent; color:#9aa3b8; font-size:1.5rem; cursor:pointer; overflow:hidden; }
+  .ph:hover { border-color:var(--teal); color:var(--teal); }
+  .ph img { display:block; width:100%; height:100%; object-fit:cover; }
+  .x { position:absolute; top:-6px; right:-6px; width:22px; height:22px; padding:0; border:0; border-radius:50%; background:rgba(27,37,64,.85); color:#fff; cursor:pointer; line-height:22px; }
+  .gap { display:flex; align-items:center; gap:10px; margin:10px 0 0; }
+  .gap span { color:var(--teal); font-size:1.3rem; width:24px; text-align:center; }
+  .ctl { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .ctl button, .add { border:1px solid var(--line); background:#fff; border-radius:8px; padding:6px 12px; cursor:pointer; font-size:.9rem; }
+  .ctl button:disabled { opacity:.35; cursor:default; }
+  .ctl .del { color:var(--danger); }
+  .add { color:var(--teal); font-weight:600; margin-top:12px; }
+  .kids { margin-top:12px; padding-left:10px; border-left:3px solid var(--soft); }
+  details.lm { margin-top:10px; }
+  details.lm summary { cursor:pointer; font-weight:600; color:var(--teal); }
+  .st { display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .st img { width:72px; height:72px; object-fit:cover; border-radius:10px; border:1px solid var(--line); }
+  .st .ctl { margin:0; }
+  .acts { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .hint { color:var(--muted); font-size:.92rem; margin:6px 0 0; }
+  .lbl { font-weight:600; }
+  h2.sec { font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:1.35rem; margin:32px 0 0; }
+  .pc { display:flex; gap:14px; align-items:center; background:var(--surf); border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:14px; }
+  .pc img { width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--line); flex:none; }
+  .pc h3 { font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:1.2rem; line-height:1.25; margin:0 0 2px; }
+  .pc .acts { margin-top:10px; }
+  .btn.del { color:var(--danger); }
+  #lb { position:fixed; inset:0; z-index:100; background:rgba(15,20,35,.88); display:flex; align-items:center; justify-content:center; padding:16px; }
+  #lb[hidden] { display:none; }
+  #lb img { max-width:100%; max-height:100%; object-fit:contain; border-radius:12px; }
+  #lb button { position:absolute; top:12px; right:12px; width:44px; height:44px; border:0; border-radius:50%; background:rgba(255,255,255,.9); color:#1b2540; font-size:1.6rem; line-height:1; cursor:pointer; }
+</style>
+<script src="sync.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Mnemonica</a>
+  <h1>Palazzo della memoria</h1>
+  <section class="intro">
+    <p>Il palazzo della memoria usa un luogo che conosci bene, come una casa o un giardino. Lo percorri con la mente e in ogni punto del percorso, detto locus, lasci una cosa da ricordare. Per ritrovarle ripercorri lo stesso cammino, nello stesso ordine.</p>
+    <p>Qui costruisci il palazzo: gli ambienti esterni e interni, i luoghi o le stanze, i loci di ciascuno e, dentro ogni locus, una catena di foto con il link metod.</p>
+  </section>
+  <button type="button" class="btn primary" id="new">Nuovo</button>
+  <div id="app"></div>
+</div>
+<input type="file" id="file" accept="image/*" hidden>
+
+<script>
+(function () {
+  var KEY = 'mnemonica-palazzi', all = [];
+  try { all = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { all = []; }
+  var cur = null, wiz = null, pend = null;
+  var qid = new URLSearchParams(location.search).get('id');
+  if (qid) cur = all.filter(function (x) { return x.id === qid; })[0] || null;
+
+  var app = document.getElementById('app'), file = document.getElementById('file');
+
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(all)); return true; }
+    catch (e) { alert('Lo spazio del browser è pieno: non riesco a salvare. Prova con meno foto.'); return false; }
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  }
+  function parse(p) { return p === '' ? [] : p.split('.').map(Number); }
+  function list(a) { return !a.length ? cur.am : a.length === 1 ? cur.am[a[0]].lu : cur.am[a[0]].lu[a[1]].lo; }
+  function tgt(p) { var a = parse(p); return a.length ? list(a.slice(0, -1))[a[a.length - 1]] : cur; }
+  function swap(arr, i, j) { var t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+
+  function shrink(f, done) {
+    var url = URL.createObjectURL(f), img = new Image();
+    img.onload = function () {
+      var r = Math.min(1, 320 / Math.max(img.width, img.height)), w = Math.round(img.width * r), h = Math.round(img.height * r);
+      var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url); done(cv.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); done(''); };
+    img.src = url;
+  }
+
+  function pw(n, p) {
+    return '<div class="pw"><button type="button" class="ph" data-act="photo" data-p="' + p + '" aria-label="Foto">' +
+      (n.ph ? '<img alt="" src="' + n.ph + '">' : '+') + '</button>' +
+      (n.ph ? '<button type="button" class="x" data-act="unphoto" data-p="' + p + '" aria-label="Rimuovi la foto">×</button>' : '') + '</div>';
+  }
+  function ctl(p, i, len) {
+    return '<div class="ctl"><button type="button" data-act="up" data-p="' + p + '"' + (i ? '' : ' disabled') + '>↑ Sposta su</button>' +
+      '<button type="button" data-act="down" data-p="' + p + '"' + (i < len - 1 ? '' : ' disabled') + '>↓ Sposta giù</button>' +
+      '<button type="button" class="del" data-act="del" data-p="' + p + '">Elimina</button></div>';
+  }
+  function gap(n, p) {
+    return '<div class="gap"><span>↓</span><input type="text" data-f="g" data-p="' + p + '" maxlength="160" value="' + esc(n.g) + '" placeholder="Testo breve verso il prossimo"></div>';
+  }
+
+  function lm(n, p) {
+    var s = n.ln || [], h = '';
+    s.forEach(function (st, i) {
+      h += '<div class="st"><img alt="" src="' + st.s + '"><div class="ctl">' +
+        '<button type="button" data-act="sup" data-p="' + p + '" data-s="' + i + '"' + (i ? '' : ' disabled') + ' aria-label="Sposta su">↑</button>' +
+        '<button type="button" data-act="sdown" data-p="' + p + '" data-s="' + i + '"' + (i < s.length - 1 ? '' : ' disabled') + ' aria-label="Sposta giù">↓</button>' +
+        '<button type="button" class="del" data-act="sdel" data-p="' + p + '" data-s="' + i + '" aria-label="Rimuovi la foto">×</button></div></div>';
+      if (i < s.length - 1) h += '<div class="gap"><span>↓</span><input type="text" data-f="a" data-p="' + p + '" data-s="' + i + '" maxlength="160" value="' + esc(st.a) + '" placeholder="Azione che collega alla foto successiva"></div>';
+    });
+    return '<details class="lm" data-p="' + p + '"' + (n.o ? ' open' : '') + '><summary>Link Metod (' + s.length + ' foto)</summary>' + h +
+      '<button type="button" class="add" data-act="addlm" data-p="' + p + '">Aggiungi foto</button></details>';
+  }
+
+  function items(arr, pre, lvl, k) {
+    return arr.map(function (n, i) {
+      var a = pre.concat(i), p = a.join('.'), h = '';
+      if (lvl === 0) {
+        h = '<div class="hd"><div class="grow"><span class="tag">' + (n.k === 'esterno' ? 'Esterno' : 'Interno') + '</span>' +
+          '<textarea data-f="d" data-p="' + p + '" placeholder="Descrizione dell’ambiente">' + esc(n.d) + '</textarea></div>' + pw(n, p) + '</div>' +
+          '<div class="kids">' + items(n.lu, a, 1, n.k) + '<button type="button" class="add" data-act="add" data-p="' + p + '">' +
+          (n.k === 'esterno' ? 'Aggiungi luogo' : 'Aggiungi stanza') + '</button></div>';
+      } else if (lvl === 1) {
+        h = '<div class="hd"><div class="grow"><span class="tag">' + (k === 'esterno' ? 'Luogo' : 'Stanza') + '</span>' +
+          '<input type="text" data-f="n" data-p="' + p + '" maxlength="80" value="' + esc(n.n) + '" placeholder="' + (k === 'esterno' ? 'Nome del luogo' : 'Nome della stanza') + '"></div>' + pw(n, p) + '</div>' +
+          '<div class="kids">' + items(n.lo, a, 2, k) + '<button type="button" class="add" data-act="add" data-p="' + p + '">Aggiungi locus</button></div>';
+      } else {
+        h = '<div class="hd"><div class="grow"><span class="tag">Locus</span>' +
+          '<input type="text" data-f="n" data-p="' + p + '" maxlength="80" value="' + esc(n.n) + '" placeholder="Nome del locus"></div>' + pw(n, p) + '</div>' + lm(n, p);
+      }
+      return '<div class="card">' + h + ctl(p, i, arr.length) + '</div>' + (i < arr.length - 1 ? gap(n, p) : '');
+    }).join('');
+  }
+
+  function count(p) {
+    var a = p.am || [], lu = 0, lo = 0;
+    a.forEach(function (x) { (x.lu || []).forEach(function (l) { lu++; lo += (l.lo || []).length; }); });
+    return 'Ambienti: ' + a.length + ' · Luoghi o stanze: ' + lu + ' · Loci: ' + lo;
+  }
+
+  function viewList() {
+    if (!all.length) return '<p class="hint" style="margin-top:20px">Non hai ancora nessun palazzo. Tocca “Nuovo” per costruirne uno.</p>';
+    return '<h2 class="sec">I miei palazzi</h2>' + all.map(function (p) {
+      return '<div class="pc">' + (p.ph ? '<img alt="" src="' + p.ph + '">' : '') + '<div class="grow"><h3>' + esc(p.t || 'Senza titolo') + '</h3>' +
+        '<p class="hint" style="margin:0">' + count(p) + '</p><div class="acts">' +
+        '<button type="button" class="btn primary sm" data-act="open" data-id="' + p.id + '">Apri o modifica</button>' +
+        '<button type="button" class="btn sm del" data-act="delp" data-id="' + p.id + '">Elimina</button></div></div></div>';
+    }).join('');
+  }
+
+  function render() {
+    if (wiz) {
+      var h = '<div class="card">';
+      if (wiz.s === 0) h += '<label class="lbl" for="w0">Titolo</label><input type="text" id="w0" data-w="t" maxlength="120" value="' + esc(wiz.t) + '"><div class="acts"><button type="button" class="btn primary" data-act="next">Avanti</button><button type="button" class="btn" data-act="cancel">Annulla</button></div>';
+      else if (wiz.s === 1) h += '<label class="lbl" for="w1">Descrizione</label><textarea id="w1" data-w="d">' + esc(wiz.d) + '</textarea><div class="acts"><button type="button" class="btn primary" data-act="next">Avanti</button><button type="button" class="btn" data-act="cancel">Annulla</button></div>';
+      else h += '<p class="lbl">Che ambiente vuoi creare?</p><div class="acts"><button type="button" class="btn primary" data-act="create" data-k="esterno">Esterno</button><button type="button" class="btn primary" data-act="create" data-k="interno">Interno</button><button type="button" class="btn" data-act="cancel">Annulla</button></div>';
+      app.innerHTML = h + '</div>';
+      var f = app.querySelector('input,textarea'); if (f) f.focus();
+      return;
+    }
+    if (!cur) { app.innerHTML = viewList(); return; }
+    app.innerHTML = '<div class="card"><div class="hd"><div class="grow"><span class="tag">Palazzo</span>' +
+      '<input type="text" data-f="t" data-p="" maxlength="120" value="' + esc(cur.t) + '" placeholder="Titolo">' +
+      '<textarea data-f="d" data-p="" placeholder="Descrizione">' + esc(cur.d) + '</textarea></div>' + pw(cur, '') + '</div></div>' +
+      items(cur.am, [], 0) +
+      '<div class="acts"><button type="button" class="btn sm" data-act="add" data-p="" data-k="esterno">Aggiungi ambiente esterno</button>' +
+      '<button type="button" class="btn sm" data-act="add" data-p="" data-k="interno">Aggiungi ambiente interno</button>' +
+      '<button type="button" class="btn primary" data-act="done">Fine</button></div>' +
+      '<p class="hint">Tutto si salva da solo nel browser di questo dispositivo.</p>';
+  }
+
+  document.getElementById('new').addEventListener('click', function () {
+    cur = null; wiz = { s: 0, t: '', d: '' }; render();
+  });
+
+  app.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (t.dataset.w) { wiz[t.dataset.w] = t.value; return; }
+    if (!t.dataset.f || !cur) return;
+    var n = tgt(t.dataset.p);
+    if (t.dataset.s !== undefined) n.ln[+t.dataset.s].a = t.value; else n[t.dataset.f] = t.value;
+    persist();
+  });
+
+  app.addEventListener('toggle', function (ev) {
+    var t = ev.target;
+    if (t.matches && t.matches('details.lm') && cur) { tgt(t.dataset.p).o = t.open; persist(); }
+  }, true);
+
+  app.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-act]');
+    if (!b) return;
+    var act = b.dataset.act, p = b.dataset.p, s = b.dataset.s, id = b.dataset.id;
+    if (act === 'cancel') { wiz = null; render(); return; }
+    if (act === 'next') {
+      if (wiz.s === 0 && !wiz.t.trim()) { app.querySelector('input').focus(); return; }
+      wiz.s++; render(); return;
+    }
+    if (act === 'create') {
+      cur = { id: String(Date.now()), t: wiz.t.trim(), d: wiz.d.trim(), ph: '', am: [{ k: b.dataset.k, d: '', ph: '', g: '', lu: [] }] };
+      all.unshift(cur); wiz = null; persist();
+      history.replaceState(null, '', '?id=' + cur.id); render(); return;
+    }
+    if (act === 'done') { cur = null; history.replaceState(null, '', location.pathname); render(); window.scrollTo(0, 0); return; }
+    if (act === 'photo' || act === 'addlm') { pend = { p: p, lm: act === 'addlm' }; file.multiple = act === 'addlm'; file.click(); return; }
+    if (act === 'open') {
+      cur = all.filter(function (x) { return x.id === id; })[0] || null;
+      if (cur) { history.replaceState(null, '', '?id=' + cur.id); render(); window.scrollTo(0, 0); }
+      return;
+    }
+    if (act === 'delp') {
+      if (confirm('Vuoi eliminare questo palazzo con tutto ciò che contiene?')) { all = all.filter(function (x) { return x.id !== id; }); persist(); render(); }
+      return;
+    }
+    var n = tgt(p), a = parse(p), sib = a.length ? list(a.slice(0, -1)) : null, i = a[a.length - 1];
+    if (act === 'unphoto') n.ph = '';
+    else if (act === 'add') {
+      if (!a.length) cur.am.push({ k: b.dataset.k, d: '', ph: '', g: '', lu: [] });
+      else if (a.length === 1) n.lu.push({ n: '', ph: '', g: '', lo: [] });
+      else n.lo.push({ n: '', ph: '', g: '', ln: [], o: false });
+    }
+    else if (act === 'up') swap(sib, i, i - 1);
+    else if (act === 'down') swap(sib, i, i + 1);
+    else if (act === 'del') { if (!confirm('Vuoi eliminare questo elemento e tutto ciò che contiene?')) return; sib.splice(i, 1); }
+    else if (act === 'sup') swap(n.ln, +s, +s - 1);
+    else if (act === 'sdown') swap(n.ln, +s, +s + 1);
+    else if (act === 'sdel') n.ln.splice(+s, 1);
+    persist(); render();
+  });
+
+  file.addEventListener('change', function () {
+    var q = Array.prototype.slice.call(file.files || []), pd = pend;
+    file.value = '';
+    if (!pd || !cur) return;
+    (function next() {
+      if (!q.length) { persist(); render(); return; }
+      shrink(q.shift(), function (src) {
+        if (src) {
+          var n = tgt(pd.p);
+          if (pd.lm) { n.ln = n.ln || []; n.ln.push({ s: src, a: '' }); } else n.ph = src;
+        }
+        next();
+      });
+    })();
+  });
+
+  render();
+})();
+</script>
+<script>
+// Ingrandisce qualsiasi foto toccata
+(function () {
+  var lb = document.createElement('div');
+  lb.id = 'lb'; lb.hidden = true;
+  lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Foto ingrandita');
+  lb.innerHTML = '<button type="button" aria-label="Chiudi">×</button><img alt="">';
+  document.body.appendChild(lb);
+  var big = lb.querySelector('img'), btn = lb.querySelector('button');
+  function close() { lb.hidden = true; big.removeAttribute('src'); }
+  lb.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !lb.hidden) close(); });
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t.tagName !== 'IMG' || lb.contains(t)) return;
+    e.preventDefault(); e.stopPropagation();
+    big.src = t.src; lb.hidden = false; btn.focus();
+  }, true);
+})();
+</script>
+</body>
+</html>

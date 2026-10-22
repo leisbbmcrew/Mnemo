@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flash Cards · Mnemonica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#eef0f4; --ink:#1b2540; --muted:#5b6580; --teal:#1f7a7a; --soft:#d6e8e8; --line:#cdd3df; --surf:#f8f9fb; --danger:#a3302f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.5; }
+  .wrap { max-width:640px; margin:0 auto; padding:24px 20px 64px; }
+  .back { display:inline-block; color:var(--teal); font-weight:500; text-decoration:none; padding:6px 0; }
+  h1, h2 { font-family:"Young Serif",Georgia,serif; font-weight:400; }
+  h1 { font-size:clamp(2rem,7vw,2.8rem); line-height:1.1; margin:12px 0 16px; }
+  h2 { font-size:1.25rem; line-height:1.25; margin:0 0 6px; }
+  .intro p { margin:0 0 12px; max-width:62ch; }
+  .intro ol { margin:0 0 20px; padding-left:20px; }
+  button, input, textarea { font:inherit; color:var(--ink); }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline:3px solid var(--teal); outline-offset:2px; }
+  .btn { font-weight:600; padding:12px 20px; border-radius:12px; border:1px solid var(--line); background:var(--surf); cursor:pointer; }
+  .btn:hover { border-color:var(--teal); }
+  .btn.primary { background:var(--teal); border-color:var(--teal); color:#fff; }
+  .warn { background:#fff6e0; border:1px solid #e3c36b; border-radius:12px; padding:12px 14px; margin:12px 0 4px; }
+  .warn p { margin:0 0 4px; }
+  .btn:disabled { opacity:.4; cursor:default; }
+  .btn.sm { padding:8px 14px; font-size:.92rem; font-weight:500; }
+  .btn.del { color:var(--danger); }
+  .card { background:var(--surf); border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:14px; }
+  .card .card { background:#fff; }
+  .tag { display:block; color:var(--teal); font-weight:600; font-size:.85rem; text-transform:uppercase; letter-spacing:.06em; margin:6px 0 4px; }
+  input[type=text], textarea { width:100%; background:#fff; border:1px solid var(--line); border-radius:10px; padding:9px 11px; }
+  .card .card input[type=text], .card .card textarea { background:var(--surf); }
+  textarea { min-height:70px; resize:vertical; }
+  .acts { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .meta { color:var(--muted); font-size:.92rem; margin:0; }
+  .boxes { display:flex; gap:6px; margin-top:10px; }
+  .boxes span { flex:1; text-align:center; background:var(--soft); border-radius:8px; padding:4px 0; font-size:.85rem; }
+  .prog { color:var(--muted); text-align:center; margin:18px 0 8px; }
+  .fc { background:#fff; border:1px solid var(--line); border-radius:18px; padding:22px 20px; min-height:220px; touch-action:pan-y; user-select:none; -webkit-user-select:none; cursor:grab; box-shadow:0 2px 10px rgba(27,37,64,.08); }
+  .fc.lock { cursor:default; }
+  .fc p { margin:0; font-size:1.25rem; white-space:pre-wrap; }
+  .fc hr { border:0; border-top:1px solid var(--line); margin:18px 0 8px; }
+  .center { text-align:center; }
+</style>
+<script src="sync.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Mnemonica</a>
+  <h1>Flash Cards</h1>
+  <section class="intro">
+    <p>Le flash card servono a ricordare ripassando a intervalli. Ogni pack raccoglie le domande e le risposte su un argomento. Quando studi, le carte che sai passano a scatole sempre più lontane nel tempo, mentre quelle sbagliate tornano alla prima.</p>
+    <ol>
+      <li>Scatola 1: ripasso ogni giorno</li>
+      <li>Scatola 2: ripasso ogni 3 giorni</li>
+      <li>Scatola 3: ripasso ogni 7 giorni</li>
+      <li>Scatola 4: ripasso ogni 14 giorni</li>
+      <li>Scatola 5: ripasso ogni 30 giorni</li>
+    </ol>
+  </section>
+  <div id="app"></div>
+</div>
+
+<script>
+(function () {
+  var KEY = 'mnemonica-flash', DAYS = [1, 3, 7, 14, 30], DAY = 864e5, packs = [];
+  try { packs = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { packs = []; }
+  var v = { m: 'list', id: null, nf: false }, S = null, app = document.getElementById('app');
+  var qid = new URLSearchParams(location.search).get('id');
+  if (qid && packs.some(function (x) { return x.id === qid; })) v = { m: 'pick', id: qid, nf: false };
+
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(packs)); return true; }
+    catch (e) { alert('Lo spazio del browser è pieno: non riesco a salvare.'); return false; }
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pk(id) { return packs.filter(function (x) { return x.id === (id || v.id); })[0]; }
+  function valid(p) { return p.cards.filter(function (c) { return c.q.trim(); }); }
+  function due(p) { var n = Date.now(); return valid(p).filter(function (c) { return c.d <= n; }); }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function fmt(ts) { return new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }); }
+
+  function viewList() {
+    var h = '<button type="button" class="btn primary" data-act="new">Nuovo</button>';
+    if (v.nf) h += '<div class="card"><label class="tag" for="nt">Titolo</label><input type="text" id="nt" maxlength="120" autocomplete="off">' +
+      '<div class="acts"><button type="button" class="btn primary" data-act="create">Crea</button><button type="button" class="btn" data-act="cancel">Annulla</button></div></div>';
+    if (!packs.length) h += '<p class="meta" style="margin-top:20px">Non hai ancora nessun pack. Tocca “Nuovo” per crearne uno.</p>';
+    packs.forEach(function (p) {
+      var vc = valid(p), b = '';
+      for (var i = 1; i <= 5; i++) b += '<span title="Scatola ' + i + '">' + i + ': ' + vc.filter(function (c) { return c.b === i; }).length + '</span>';
+      h += '<div class="card"><h2>' + esc(p.t) + '</h2><p class="meta">Carte: ' + vc.length + ' · da ripassare ora: ' + due(p).length + '</p>' +
+        '<div class="boxes" aria-label="Carte per scatola">' + b + '</div><div class="acts">' +
+        '<button type="button" class="btn primary sm" data-act="study" data-id="' + p.id + '">Test</button>' +
+        '<button type="button" class="btn sm" data-act="edit" data-id="' + p.id + '">Aggiungi o modifica</button>' +
+        '<button type="button" class="btn sm del" data-act="del" data-id="' + p.id + '">Elimina</button></div></div>';
+    });
+    return h;
+  }
+
+  function viewEdit() {
+    var p = pk(), h = '<div class="card"><label class="tag" for="pt">Titolo</label><input type="text" id="pt" data-f="t" maxlength="120" value="' + esc(p.t) + '"></div>';
+    p.cards.forEach(function (c, i) {
+      h += '<div class="card"><span class="tag">Domanda</span><textarea data-f="q" data-i="' + i + '">' + esc(c.q) + '</textarea>' +
+        '<span class="tag">Risposta</span><textarea data-f="a" data-i="' + i + '">' + esc(c.a) + '</textarea>' +
+        '<div class="acts" style="align-items:center"><span class="meta">Scatola ' + c.b + '</span>' +
+        '<button type="button" class="btn sm del" data-act="delcard" data-i="' + i + '">Elimina</button></div></div>';
+    });
+    return h + '<div class="acts"><button type="button" class="btn sm" data-act="addcard">Aggiungi</button>' +
+      '<button type="button" class="btn primary" data-act="study" data-id="' + p.id + '">Test</button>' +
+      '<button type="button" class="btn" data-act="done">Fine</button></div>';
+  }
+
+  function viewPick() {
+    var p = pk(), vc = valid(p), n = Date.now(),
+      h = '<div class="card"><h2>' + esc(p.t) + '</h2><p class="meta">Scegli la scatola da mettere alla prova.</p>';
+    if (v.w) {
+      var nx = vc.filter(function (c) { return c.b === v.w; }).map(function (c) { return c.d; }).sort(function (a, b) { return a - b; })[0];
+      h += '<div class="warn" role="alert"><p><strong>Non sono ancora passati i giorni previsti per la scatola ' + v.w + '.</strong></p>' +
+        '<p>' + (nx ? 'Le sue carte saranno pronte il ' + fmt(nx) + '. ' : '') + 'Vuoi eseguire comunque il test?</p>' +
+        '<div class="acts"><button type="button" class="btn primary sm" data-act="force" data-b="' + v.w + '">Esegui comunque</button>' +
+        '<button type="button" class="btn sm" data-act="nowarn">Annulla</button></div></div>';
+    }
+    h += '<div class="acts" style="flex-direction:column">';
+    for (var i = 1; i <= 5; i++) {
+      var cs = vc.filter(function (c) { return c.b === i; }), dd = cs.filter(function (c) { return c.d <= n; }).length;
+      h += '<button type="button" class="btn" data-act="box" data-b="' + i + '"' + (cs.length ? '' : ' disabled') + '>Scatola ' + i + ' · carte: ' + cs.length + (cs.length ? ' · da ripassare: ' + dd : '') + '</button>';
+    }
+    return h + '</div><div class="acts"><button type="button" class="btn sm" data-act="exit">Indietro</button></div></div>';
+  }
+
+  function viewStudy() {
+    var p = pk();
+    if (S.i >= S.q.length) {
+      var next = valid(p).map(function (c) { return c.d; }).sort()[0];
+      return '<div class="card center"><h2>' + (S.q.length ? 'Ripasso finito' : 'Nessuna carta da ripassare ora') + '</h2>' +
+        (S.q.length ? '<p>Giuste: ' + S.ok + ' · Sbagliate: ' + S.ko + '</p>' : '') +
+        (next && next > Date.now() ? '<p class="meta">Prossimo ripasso: ' + fmt(next) + '</p>' : '') +
+        '<div class="acts" style="justify-content:center"><button type="button" class="btn primary" data-act="again">Altra scatola</button><button type="button" class="btn" data-act="exit">Chiudi</button></div></div>';
+    }
+    var c = S.q[S.i];
+    return '<p class="prog">' + (S.i + 1) + ' / ' + S.q.length + ' · Scatola ' + c.b + '</p>' +
+      '<div class="fc' + (S.rev ? '' : ' lock') + '" id="fc"><span class="tag">Domanda</span><p>' + esc(c.q) + '</p>' +
+      (S.rev ? '<hr><span class="tag">Risposta</span><p>' + esc(c.a || '—') + '</p>' : '') + '</div>' +
+      (S.rev
+        ? '<p class="meta center" style="margin-top:12px">Trascina la carta a destra se la sapevi, a sinistra se hai sbagliato.</p>' +
+          '<div class="acts" style="justify-content:center"><button type="button" class="btn" data-act="no">✗ Sbagliata</button><button type="button" class="btn" data-act="yes">✓ Giusta</button></div>'
+        : '<div class="acts" style="justify-content:center"><button type="button" class="btn primary" data-act="reveal">Risposta</button></div>') +
+      '<div class="acts" style="justify-content:center"><button type="button" class="btn sm" data-act="exit">Esci</button></div>';
+  }
+
+  function render() {
+    app.innerHTML = v.m === 'edit' ? viewEdit() : v.m === 'pick' ? viewPick() : v.m === 'study' ? viewStudy() : viewList();
+    if (v.m === 'study' && S && S.rev && document.getElementById('fc')) swipe(document.getElementById('fc'));
+    if (v.nf) { var f = document.getElementById('nt'); if (f) f.focus(); }
+  }
+
+  function answer(ok) {
+    var c = S.q[S.i];
+    c.b = ok ? Math.min(5, c.b + 1) : 1;
+    c.d = Date.now() + DAYS[c.b - 1] * DAY;
+    if (ok) S.ok++; else S.ko++;
+    persist(); S.i++; S.rev = false; render();
+  }
+
+  function mix(t, c) { return 'rgb(' + c.map(function (x) { return Math.round(255 + (x - 255) * t); }).join(',') + ')'; }
+
+  function swipe(el) {
+    var sx = null, busy = false;
+    el.addEventListener('pointerdown', function (e) {
+      if (busy) return;
+      sx = e.clientX; el.style.transition = 'none';
+      try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (sx === null) return;
+      var dx = e.clientX - sx, t = Math.min(Math.abs(dx) / 120, 1) * 0.75;
+      el.style.transform = 'translateX(' + dx + 'px) rotate(' + dx / 25 + 'deg)';
+      el.style.background = mix(t, dx > 0 ? [76, 175, 110] : [214, 84, 84]);
+    });
+    function end(e) {
+      if (sx === null) return;
+      var dx = e.clientX - sx; sx = null;
+      if (Math.abs(dx) > 110) {
+        busy = true;
+        el.style.transition = 'transform .25s ease, opacity .25s ease';
+        el.style.transform = 'translateX(' + (dx > 0 ? 600 : -600) + 'px) rotate(' + (dx > 0 ? 20 : -20) + 'deg)';
+        el.style.opacity = '0';
+        setTimeout(function () { answer(dx > 0); }, 240);
+      } else {
+        el.style.transition = 'transform .2s ease, background .2s ease';
+        el.style.transform = ''; el.style.background = '';
+      }
+    }
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+  }
+
+  app.addEventListener('input', function (ev) {
+    var t = ev.target, p = v.m === 'edit' ? pk() : null;
+    if (!p || !t.dataset.f) return;
+    if (t.dataset.i !== undefined) p.cards[+t.dataset.i][t.dataset.f] = t.value; else p[t.dataset.f] = t.value;
+    persist();
+  });
+
+  app.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-act]');
+    if (!b) return;
+    var act = b.dataset.act, id = b.dataset.id;
+    if (act === 'new') { v.nf = true; render(); return; }
+    if (act === 'cancel') { v.nf = false; render(); return; }
+    if (act === 'create') {
+      var t = document.getElementById('nt').value.trim();
+      if (!t) { document.getElementById('nt').focus(); return; }
+      var p = { id: String(Date.now()), t: t, cards: [] };
+      packs.unshift(p); persist(); v = { m: 'edit', id: p.id, nf: false }; render(); return;
+    }
+    if (act === 'edit') { v = { m: 'edit', id: id, nf: false }; render(); return; }
+    if (act === 'del') {
+      if (confirm('Vuoi eliminare questo pack con tutte le sue carte?')) { packs = packs.filter(function (x) { return x.id !== id; }); persist(); render(); }
+      return;
+    }
+    if (act === 'addcard') {
+      pk().cards.push({ id: String(Date.now()), q: '', a: '', b: 1, d: 0 }); persist(); render();
+      var ta = app.querySelectorAll('textarea[data-f=q]'); if (ta.length) ta[ta.length - 1].focus();
+      return;
+    }
+    if (act === 'delcard') { pk().cards.splice(+b.dataset.i, 1); persist(); render(); return; }
+    if (act === 'done') { var q = pk(); q.cards = valid(q); persist(); v = { m: 'list', id: null, nf: false }; render(); window.scrollTo(0, 0); return; }
+    if (act === 'study') {
+      var sp = pk(id);
+      if (v.m === 'edit') sp.cards = valid(sp);
+      if (!sp.cards.length) { alert('Questo pack non ha ancora carte: usa “Aggiungi o modifica”.'); return; }
+      persist(); v = { m: 'pick', id: id, nf: false }; render(); return;
+    }
+    if (act === 'box' || act === 'force') {
+      var bn = +b.dataset.b, cs = valid(pk()).filter(function (c) { return c.b === bn; }),
+        ready = cs.filter(function (c) { return c.d <= Date.now(); });
+      if (act === 'box' && !ready.length) { v.w = bn; render(); return; }
+      S = { q: shuffle(act === 'force' ? cs : ready), i: 0, rev: false, ok: 0, ko: 0 };
+      v.m = 'study'; v.w = null; render(); return;
+    }
+    if (act === 'nowarn') { v.w = null; render(); return; }
+    if (act === 'again') { v.m = 'pick'; v.w = null; S = null; render(); return; }
+    if (act === 'reveal') { S.rev = true; render(); return; }
+    if (act === 'yes') { answer(true); return; }
+    if (act === 'no') { answer(false); return; }
+    if (act === 'exit') { v = { m: 'list', id: null, nf: false }; S = null; render(); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
